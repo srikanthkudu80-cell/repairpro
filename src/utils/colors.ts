@@ -1,13 +1,13 @@
 // App-wide color palette for RepairPro
 export const Colors = {
-  primary: '#2563EB',
-  primaryDark: '#1D4ED8',
-  primaryLight: '#DBEAFE',
-  background: '#F1F5F9',
+  primary: '#008080',
+  primaryDark: '#006666',
+  primaryLight: '#CCEEEE',
+  background: '#F0FAFA',
   surface: '#FFFFFF',
   textPrimary: '#1E293B',
   textSecondary: '#64748B',
-  border: '#E2E8F0',
+  border: '#B2D8D8',
   success: '#16A34A',
   successLight: '#DCFCE7',
   warning: '#D97706',
@@ -17,7 +17,7 @@ export const Colors = {
   purple: '#7C3AED',
   purpleLight: '#EDE9FE',
   gray: '#64748B',
-  grayLight: '#F8FAFC',
+  grayLight: '#F0FAFA',
 };
 
 // Status colors for job badges

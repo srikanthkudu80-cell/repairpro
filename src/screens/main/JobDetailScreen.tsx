@@ -31,7 +31,7 @@ import { formatDate, formatTime, formatPhone } from '@/utils/formatters';
 
 export default function JobDetailScreen({ route, navigation }: any) {
   const { jobId } = route.params;
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
   const [note, setNote] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -65,6 +65,15 @@ export default function JobDetailScreen({ route, navigation }: any) {
 
   async function handlePhotoAdd(localUri: string) {
     if (!user || !job) return;
+    // Pro feature: photo uploads
+    if (profile?.plan === 'free') {
+      Alert.alert(
+        'Pro Feature',
+        'Photo uploads are available on the Pro plan. Toggle to Pro in your Profile to unlock.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     setUploading(true);
     try {
       const url = await uploadJobPhoto(user.uid, job.id, localUri);

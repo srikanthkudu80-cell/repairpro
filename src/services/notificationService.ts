@@ -100,3 +100,18 @@ export async function scheduleDailyDigest(): Promise<void> {
     },
   });
 }
+
+/**
+ * Send an immediate test notification to verify push notifications are working.
+ */
+export async function sendTestNotification(): Promise<void> {
+  if (isWeb) return;
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: '🔧 RepairPro',
+      body: "Notifications are working! You'll receive job reminders and daily morning updates.",
+      sound: true,
+    },
+    trigger: { seconds: 1 },
+  });
+}

@@ -4,12 +4,12 @@
     "slug": "repairpro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#2563EB"
+      "backgroundColor": "#008080"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -24,8 +24,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png",
-        "backgroundColor": "#2563EB"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#008080"
       },
       "package": "com.yourname.repairpro",
       "permissions": [
@@ -37,14 +37,14 @@
       ]
     },
     "web": {
-      "favicon": "./assets/images/logo.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/logo.png",
-          "color": "#2563EB"
+          "icon": "./assets/images/icon.png",
+          "color": "#008080"
         }
       ],
       [

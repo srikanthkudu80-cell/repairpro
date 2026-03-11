@@ -13,14 +13,14 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
-import { createJob } from '@/services/jobService';
+import { createJob, getJobs } from '@/services/jobService';
 import { upsertCustomer } from '@/services/customerService';
 import { scheduleJobReminder } from '@/services/notificationService';
 import { Colors } from '@/utils/colors';
 import { APPLIANCE_TYPES } from '@/utils/constants';
 
 export default function AddJobScreen({ navigation }: any) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -29,6 +29,7 @@ export default function AddJobScreen({ navigation }: any) {
   const [issue, setIssue] = useState('');
   const [scheduledDate, setScheduledDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
@@ -37,6 +38,20 @@ export default function AddJobScreen({ navigation }: any) {
       return;
     }
     if (!user) return;
+
+    // Free plan: max 10 active (non-invoiced) jobs
+    if (profile?.plan === 'free') {
+      const existing = await getJobs(user.uid);
+      const active = existing.filter((j) => j.status !== 'invoiced');
+      if (active.length >= 10) {
+        Alert.alert(
+          'Free Plan Limit Reached',
+          'You have 10 active jobs (the Free limit). Mark some as Invoiced or upgrade to Pro for unlimited jobs.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
 
     setLoading(true);
     try {
@@ -156,7 +171,10 @@ export default function AddJobScreen({ navigation }: any) {
         <Field label="Scheduled Date & Time">
           <TouchableOpacity
             style={styles.datePicker}
-            onPress={() => setShowDatePicker(true)}
+            onPress={() => {
+              setPickerMode('date');
+              setShowDatePicker(true);
+            }}
           >
             <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
             <Text style={styles.dateText}>
@@ -167,12 +185,25 @@ export default function AddJobScreen({ navigation }: any) {
           {showDatePicker && (
             <DateTimePicker
               value={scheduledDate}
-              mode="datetime"
+              mode={Platform.OS === 'ios' ? 'datetime' : pickerMode}
               display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              minimumDate={new Date()}
-              onChange={(_, date) => {
-                setShowDatePicker(Platform.OS === 'ios');
-                if (date) setScheduledDate(date);
+              minimumDate={pickerMode === 'date' ? new Date() : undefined}
+              onChange={(event, date) => {
+                if (Platform.OS === 'android') {
+                  setShowDatePicker(false);
+                  if (event.type === 'dismissed') return;
+                  if (date) {
+                    setScheduledDate(date);
+                    if (pickerMode === 'date') {
+                      // After picking date, immediately show time picker
+                      setPickerMode('time');
+                      setShowDatePicker(true);
+                    }
+                  }
+                } else {
+                  // iOS: inline picker, always keep open
+                  if (date) setScheduledDate(date);
+                }
               }}
             />
           )}

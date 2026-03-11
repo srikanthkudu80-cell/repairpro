@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,63 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Switch,
 } from 'react-native';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/config/firebase';
 import { Colors } from '@/utils/colors';
+import { sendTestNotification, registerForPushNotifications } from '@/services/notificationService';
 
 export default function ProfileScreen() {
-  const { profile, logOut, refreshProfile } = useAuth();
+  const { profile, logOut, refreshProfile, updatePlan } = useAuth();
   const [businessName, setBusinessName] = useState(profile?.businessName ?? '');
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [planUpdating, setPlanUpdating] = useState(false);
+  const [notifGranted, setNotifGranted] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  useEffect(() => {
+    Notifications.getPermissionsAsync().then(({ status }) => {
+      setNotifGranted(status === 'granted');
+    });
+  }, []);
+
+  async function handlePlanToggle(toPro: boolean) {
+    setPlanUpdating(true);
+    try {
+      await updatePlan(toPro ? 'pro' : 'free');
+    } finally {
+      setPlanUpdating(false);
+    }
+  }
+
+  async function handleEnableNotifications() {
+    setNotifLoading(true);
+    try {
+      const token = await registerForPushNotifications();
+      setNotifGranted(!!token);
+      if (token) {
+        Alert.alert('Notifications Enabled', 'You will receive job reminders and daily morning updates.');
+      } else {
+        Alert.alert('Permission Denied', 'Please enable notifications in your device Settings > Apps > RepairPro.');
+      }
+    } finally {
+      setNotifLoading(false);
+    }
+  }
+
+  async function handleTestNotification() {
+    try {
+      await sendTestNotification();
+      Alert.alert('Sent!', 'A test notification will appear in about 1 second.');
+    } catch {
+      Alert.alert('Error', 'Could not send test notification.');
+    }
+  }
 
   async function saveBusinessName() {
     if (!profile) return;
@@ -95,18 +140,68 @@ export default function ProfileScreen() {
         )}
       </View>
 
-      {/* Plan Info */}
-      {profile?.plan === 'free' && (
-        <View style={styles.upgradeCard}>
-          <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
-          <Text style={styles.upgradeBody}>
-            Unlock unlimited jobs, photo uploads, and customer history export for just $4.99/month.
-          </Text>
-          <TouchableOpacity style={styles.upgradeBtn}>
-            <Text style={styles.upgradeBtnText}>Upgrade Now →</Text>
-          </TouchableOpacity>
+      {/* Plan */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Plan</Text>
+        <View style={styles.planRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardValue}>
+              {profile?.plan === 'pro' ? '⭐  Pro Plan' : 'Free Plan'}
+            </Text>
+            <Text style={styles.cardSub}>
+              {profile?.plan === 'pro'
+                ? 'Unlimited jobs · Photo uploads · Customer export'
+                : 'Up to 10 active jobs · No photo uploads'}
+            </Text>
+          </View>
+          <Switch
+            value={profile?.plan === 'pro'}
+            onValueChange={handlePlanToggle}
+            disabled={planUpdating}
+            trackColor={{ false: Colors.border, true: Colors.primary }}
+            thumbColor="#fff"
+          />
         </View>
-      )}
+        <Text style={styles.devNote}>🧪 Dev toggle — connects to payment in production</Text>
+      </View>
+
+      {/* Notifications */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Notifications</Text>
+        <View style={styles.notifStatusRow}>
+          <Ionicons
+            name={notifGranted ? 'notifications' : 'notifications-off-outline'}
+            size={20}
+            color={notifGranted ? Colors.primary : Colors.textSecondary}
+          />
+          <Text style={[styles.cardValue, { marginLeft: 8 }]}>
+            {notifGranted ? 'Enabled' : 'Disabled'}
+          </Text>
+        </View>
+        {!notifGranted ? (
+          <TouchableOpacity
+            style={styles.notifBtn}
+            onPress={handleEnableNotifications}
+            disabled={notifLoading}
+          >
+            <Text style={styles.notifBtnText}>
+              {notifLoading ? 'Requesting...' : 'Enable Notifications'}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[styles.notifBtn, styles.notifBtnSecondary]}
+            onPress={handleTestNotification}
+          >
+            <Text style={[styles.notifBtnText, { color: Colors.primary }]}>
+              Send Test Notification
+            </Text>
+          </TouchableOpacity>
+        )}
+        <Text style={styles.cardSub}>
+          Daily reminder at 8 AM · Job alert 1 hour before start
+        </Text>
+      </View>
 
       {/* App Info */}
       <View style={styles.card}>
@@ -276,5 +371,38 @@ const styles = StyleSheet.create({
     color: Colors.error,
     fontSize: 16,
     fontWeight: '600',
+  },
+  planRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  devNote: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontStyle: 'italic',
+    marginTop: 6,
+  },
+  notifStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  notifBtn: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  notifBtnSecondary: {
+    backgroundColor: Colors.primaryLight,
+  },
+  notifBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

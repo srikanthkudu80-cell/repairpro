@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/config/firebase';
 
 export interface UserProfile {
@@ -26,6 +26,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  updatePlan: (plan: 'free' | 'pro') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -97,9 +98,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function updatePlan(plan: 'free' | 'pro') {
+    if (!user) return;
+    await updateDoc(doc(db, 'users', user.uid), { plan });
+    setProfile((prev) => (prev ? { ...prev, plan } : prev));
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, signUp, signIn, logOut, refreshProfile }}
+      value={{ user, profile, loading, signUp, signIn, logOut, refreshProfile, updatePlan }}
     >
       {children}
     </AuthContext.Provider>

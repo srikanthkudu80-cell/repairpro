@@ -1,7 +1,9 @@
 import React from 'react';
+import { View, Text, Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DashboardScreen from '@/screens/main/DashboardScreen';
 import JobListScreen from '@/screens/main/JobListScreen';
 import AddJobScreen from '@/screens/main/AddJobScreen';
@@ -19,10 +21,10 @@ function JobsStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.surface },
-        headerShadowVisible: true,
-        headerTintColor: Colors.primary,
-        headerTitleStyle: { fontWeight: '700', color: Colors.textPrimary },
+        headerStyle: { backgroundColor: Colors.primary },
+        headerShadowVisible: false,
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: '700', color: '#fff' },
       }}
     >
       <Stack.Screen
@@ -49,10 +51,10 @@ function CustomersStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.surface },
-        headerShadowVisible: true,
-        headerTintColor: Colors.primary,
-        headerTitleStyle: { fontWeight: '700', color: Colors.textPrimary },
+        headerStyle: { backgroundColor: Colors.primary },
+        headerShadowVisible: false,
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: '700', color: '#fff' },
       }}
     >
       <Stack.Screen
@@ -74,16 +76,29 @@ function DashboardStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.surface },
-        headerShadowVisible: true,
-        headerTintColor: Colors.primary,
-        headerTitleStyle: { fontWeight: '700', color: Colors.textPrimary },
+        headerStyle: { backgroundColor: Colors.primary },
+        headerShadowVisible: false,
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: '700', color: '#fff' },
       }}
     >
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
-        options={{ title: 'RepairPro' }}
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Image
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                source={require('../../assets/images/icon.png')}
+                style={{ width: 28, height: 28, borderRadius: 7 }}
+              />
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 0.2 }}>
+                RepairPro
+              </Text>
+            </View>
+          ),
+        }}
       />
       <Stack.Screen
         name="AddJob"
@@ -105,16 +120,19 @@ function DashboardStack() {
 }
 
 export default function MainTabs() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }: { route: { name: string } }) => ({
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarActiveTintColor: '#fff',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.55)',
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
+          backgroundColor: Colors.primary,
+          borderTopColor: Colors.primaryDark,
           paddingTop: 4,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 6,
+          height: 56 + (insets.bottom > 0 ? insets.bottom : 6),
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         tabBarIcon: ({ focused, color, size }: { focused: boolean; color: string; size: number }) => {
