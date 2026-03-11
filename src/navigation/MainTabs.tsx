@@ -30,7 +30,7 @@ function JobsStack() {
       <Stack.Screen
         name="JobList"
         component={JobListScreen}
-        options={{ title: 'My Jobs' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="JobDetail"
@@ -113,7 +113,7 @@ function DashboardStack() {
       <Stack.Screen
         name="JobList"
         component={JobListScreen}
-        options={{ title: 'My Jobs' }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

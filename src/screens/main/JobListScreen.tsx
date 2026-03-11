@@ -10,6 +10,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 import { getJobs, Job } from '@/services/jobService';
@@ -28,6 +29,7 @@ const STATUS_DOTS: Record<string, string> = {
 };
 
 export default function JobListScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filter, setFilter] = useState<JobStatus | typeof ALL_TAB>(ALL_TAB);
@@ -77,7 +79,7 @@ export default function JobListScreen({ navigation }: any) {
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View>
           <Text style={styles.headerTitle}>My Jobs</Text>
           <Text style={styles.headerSubtitle}>
@@ -210,7 +212,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.primary,
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 28,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -259,62 +260,57 @@ const styles = StyleSheet.create({
   // Tabs
   tabsContainer: {
     paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 6,
+    paddingTop: 12,
+    paddingBottom: 8,
     gap: 8,
   },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: 34,
     paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 9,
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: '#D1D5DB',
-    gap: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    borderRadius: 20,
+    backgroundColor: '#EEF0F3',
+    gap: 6,
   },
   tabActive: {
     backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.40,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 5,
-    shadowOpacity: 0.18,
   },
   tabDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
   tabText: {
     fontSize: 13,
-    color: Colors.textSecondary,
-    fontWeight: '500',
+    color: '#64748B',
+    fontWeight: '600',
   },
   tabTextActive: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   tabBadge: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(0,0,0,0.10)',
     borderRadius: 999,
-    minWidth: 18,
-    height: 18,
+    minWidth: 19,
+    height: 19,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 5,
   },
   tabBadgeActive: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.28)',
   },
   tabBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.textSecondary,
+    color: '#475569',
   },
   tabBadgeTextActive: {
     color: '#fff',
